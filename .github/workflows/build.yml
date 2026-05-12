@@ -1,0 +1,37 @@
+name: Build Taskbar-Lyrics
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: # 允许手动触发编译
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install vcpkg
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git
+        cd vcpkg
+        .\bootstrap-vcpkg.bat
+        .\vcpkg integrate install
+        
+    - name: Install dependencies
+      run: |
+        .\vcpkg\vcpkg install cpp-httplib:x86-windows nlohmann-json:x86-windows
+        
+    - name: Build project
+      run: |
+        msbuild "Taskbar Lyrics.sln" /p:Configuration=Release /p:Platform=x86
+        
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: taskbar-lyrics
+        path: bin/Release/taskbar-lyrics.dll
