@@ -15,9 +15,18 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+      
+    - name: Install Visual Studio Build Tools
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x86
+        toolset: 14.3
+        
     - name: Install vcpkg
       run: |
-        git clone https://github.com/microsoft/vcpkg.git
+        git clone https://github.com/microsoft/vcpkg.git --depth 1
         cd vcpkg
         .\bootstrap-vcpkg.bat
         .\vcpkg integrate install
@@ -28,7 +37,7 @@ jobs:
         
     - name: Build project
       run: |
-        msbuild "Taskbar Lyrics.sln" /p:Configuration=Release /p:Platform=x86
+        msbuild "Taskbar Lyrics.sln" /p:Configuration=Release /p:Platform=x86 /p:VcpkgEnabled=true
         
     - name: Upload artifact
       uses: actions/upload-artifact@v4
